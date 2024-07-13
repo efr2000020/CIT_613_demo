@@ -1,6 +1,7 @@
 import unittest
 from calculator import Calculator
-import xmlrunner
+from io import StringIO
+import sys
 
 class TestCalculator(unittest.TestCase):
     def setUp(self):
@@ -29,5 +30,29 @@ class TestCalculator(unittest.TestCase):
             self.calc.divide(10, 0)
 
 if __name__ == '__main__':
-    with open('test-reports/results.xml', 'wb') as output:
-        unittest.main(testRunner=xmlrunner.XMLTestRunner(output=output))
+    # Redirect stdout to capture the output of the test runner
+    output = StringIO()
+    runner = unittest.TextTestRunner(stream=output, verbosity=2)
+    result = unittest.main(testRunner=runner, exit=False)
+
+    # Parse the output to extract test results
+    output.seek(0)
+    result_text = output.read()
+    
+    # Generate HTML report
+    html_content = f"""
+    <html>
+    <head>
+        <title>Unit Test Report</title>
+    </head>
+    <body>
+        <h1>Unit Test Report</h1>
+        <pre>{result_text}</pre>
+    </body>
+    </html>
+    """
+
+    with open('test-reports/results.html', 'w') as f:
+        f.write(html_content)
+    
+    print("HTML report generated: test-reports/results.html")
